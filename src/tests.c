@@ -30,7 +30,6 @@ int _unsetName() {
 	int num = numNames;
 	char* name = "Wedge";
 	setName(name);
-	printf("%d\n", unsetName(name)); /* PROBLEM: used name == bad name */
 	_assert(!unsetName(name)); /* no errors unsetting name */
 	_assert(!badName(name)); /* name is no longer being used */
 	char* unusedName = "Biggs";

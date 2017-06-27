@@ -41,10 +41,15 @@ int setName(const char* name) {
 }
 
 int unsetName(const char* name) {
-	if ( badName(name) ) return -1;
+	char* _name = newName(name);
+	if ( _index(_name) < 0 ) {
+		free(_name);
+		return -1;
+	}
 	unsigned int i;
-	for ( i=_index(name); i<numNames-1; i++ ) names[i] = names[i+1];
+	for ( i=_index(_name); i<numNames-1; i++ ) names[i] = names[i+1];
 	numNames--;
+	free(_name);
 	return 0;
 }
 	
