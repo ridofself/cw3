@@ -3,7 +3,9 @@
 #include <string.h> /* strcmp, strcpy, memcpy */
 #include <malloc.h> /* malloc, free */
 #include <ctype.h> /* isalpha */
+
 #define NAME_LENGTH_MAX 21
+
 
 static char** name_list;
 static unsigned int name_count = 0;

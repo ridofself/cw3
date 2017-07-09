@@ -3,8 +3,7 @@
 #include <malloc.h> /* malloc */
 #include <string.h> /* strcmp */
 #include "name.h" /* name_create */
-
-struct acter {	char* name;	};
+#include "acter.h" /* struct acter */
 
 
 static struct acter** acter_list;
@@ -41,6 +40,42 @@ int acter_destroy(const char* name) {
 			return 0; } }
 
 	return -3; } /* name exists but is not an acter name */
+
+
+struct acter* acter_get(const char* name) {
+	if ( !name ) return NULL; 
+
+	int i;
+	for ( i=0; i<acter_count; i++ ) {
+		if ( !strcmp(acter_list[i]->name, name) ) {
+			return acter_list[i]; } }
+
+	return NULL; } /* no such acter name */
+
+
+struct acter_group* acter_group_new() {
+	struct acter_group* newGroup = malloc(sizeof (struct acter_group));
+	newGroup->count = 0;
+	int i;
+	for ( i=0; i<ACTER_GROUP_MAX; i++ ) newGroup->member[i] = NULL;
+	return newGroup; }
+	
+
+int acter_group_assign(struct acter_group* group, struct acter* acter) {
+	group->member[group->count++] = acter;
+	return 0; }
+
+
+int acter_group_resign(struct acter_group* group, struct acter* acter) {
+	int i;
+	for ( i=0; i<group->count; i++ ) {
+		if ( group->member[i] == acter ) {
+			for ( ; i<group->count-1; i++ ) {
+				group->member[i] = group->member[i+1];
+				group->count--; }
+			return 0; } }
+
+	return -1; } /* no such acter */
 
 
 /* end of file */

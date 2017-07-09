@@ -3,8 +3,8 @@
 #include <malloc.h> /* realloc */
 #include "string.h" /* strcmp */
 #include "name.h" /* name_create, name_destroy, name_get */
-
-struct user {	char* name;	};
+#include "acter.h" /* struct acter */
+#include "user.h" /* struct user */
 
 
 static struct user** user_list;
@@ -17,6 +17,7 @@ int user_create(const char* name) {
 
 	struct user* newUser = (struct user*) malloc(sizeof (struct user));
 	newUser->name = name_get(name);
+	newUser->party = acter_group_new();
 	user_list = (struct user**)
 		realloc(user_list, (user_count+1) * sizeof (struct user*));
 	user_list[user_count] = newUser;
@@ -41,6 +42,18 @@ int user_destroy(const char* name) {
 			return 0; } } /* user destroyed */ 
 
 	return -3; } /* name is not a user name */
+
+
+struct user* user_get(const char* name) {
+
+	if ( !name ) return NULL; 
+
+	int i;
+	for ( i=0; i<user_count; i++ ) {
+		if ( !strcmp(user_list[i]->name, name) ) {
+			return user_list[i]; } }
+
+	return NULL; } /* no such acter name */
 
 
 /* end of file */
