@@ -5,4 +5,4 @@ int name_destroy(const char*);
 char* name_get(const char*);
 int name_change(const char*, const char*);
 
-/* name.c */
+/* end of file */
