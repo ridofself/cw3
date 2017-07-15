@@ -3,14 +3,14 @@
 #include <string.h> /* strcmp, strcpy, memcpy */
 #include <malloc.h> /* malloc, free */
 #include <ctype.h> /* isalpha */
+#include <stdlib.h> /* rand */
 
-#define NAME_LENGTH_MAX 21
-
+#include "name.h" /* NAME_LENGTH_MAX */
 
 static char** name_list;
 static unsigned int name_count = 0;
 
-static int name_check(const char* name)
+static int name_check(const char* name) /* returns 0 if name is valid */
 {
 	if ( !name ) return -1; /* name is NULL */
 
@@ -23,23 +23,22 @@ static int name_check(const char* name)
 		free(copiedName);
 		return -3; /* no null term within NAME_LENGTH_MAX chars */
 	}
+
 	int i;
 	for ( i=0; i<strlen(copiedName); i++ )
-	{
 		if ( !isalpha(copiedName[i]) && copiedName[i] != 32 )
 		{
 			free(copiedName);
 			return -4; /* contains at least one illegal char */
 		}
-	}
+
 	for ( i=0; i<name_count; i++ )
-	{
 		if ( !strcmp(name_list[i], copiedName) )
 		{
 			free(copiedName);
 			return -5; /* name is already in use */
 		}
-	}
+
 	free(copiedName);
 	return 0;
 }
@@ -67,9 +66,7 @@ int name_destroy(const char* name)
 		{
 			free(name_list[i]);
 			for ( ; i<name_count-1; i++ )
-			{ 
 				name_list[i] = name_list[i+1];
-			}
 			name_count--;
 		}
 	}
@@ -82,9 +79,8 @@ char* name_get(const char* name)
 
 	int i;
 	for ( i=0; i<name_count; i++ )
-	{
 		if ( !strcmp(name_list[i], name) ) return name_list[i];
-	}
+
 	return NULL; /* name does not exist */
 }
 
@@ -96,6 +92,18 @@ int name_change(const char* old, const char* new)
 
 	strcpy(name_get(old), new);
 	return 0;
+}
+
+void name_random(char* s, const int len)
+{
+	static const char alpha[] =
+		" ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz";
+	int i;
+	for ( i=0; i<len; ++i ) 
+		s[i] = alpha[rand() % (sizeof (alpha) - 1)];
+
+	s[len] = 0;
 }
 
 /* end of file */

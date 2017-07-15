@@ -3,7 +3,7 @@
 struct user
 {
 	char* name;
-	struct acter_group* party;
+	struct agent_team* team;
 };
 		
 int user_create(const char*);

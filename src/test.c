@@ -2,7 +2,7 @@
 
 #include "test.h" /* _assert, test, FAIL */
 #include <stdio.h>  /* printf */
-#include <string.h> /* strcmp */
+#include <string.h> /* strcmp, strupr */
 #include <malloc.h> /* free */
 
 int count = 0;
@@ -15,29 +15,37 @@ int __assert()
 
 #include "name.h"
 
+char rName[NAME_LENGTH_MAX];
+char* randName()
+{
+	name_random(rName, NAME_LENGTH_MAX);
+	return rName;
+}
+
 int _name_create()
 {
-	char* name = "Biggs";
+	char* name = randName();
 	_assert(!name_create(name)); /* no errors expected */
 	_assert(name_create(NULL) == -1);
 	_assert(name_create("") == -2);
-	_assert(name_create("ThisNameIsTooLongItShouldFailToCreate") == -3);
+
+	char nameTooLong[NAME_LENGTH_MAX+1];
+	name_random(nameTooLong, NAME_LENGTH_MAX+1);
+	_assert(name_create(nameTooLong) == -3);
+
 	_assert(name_create("ill3g@l ch@r \name") == -4);
 	_assert(name_create(name) == -5); /*duplicate name */
 	name_destroy(name);
-	char * nameWithSpaces = "Sergeant Biggs";
-	_assert(!name_create(nameWithSpaces));
-	name_destroy(nameWithSpaces);
 	return 0;
 }
 
 int _name_destroy()
 {
-	char* name = "Wedge";
-	_assert(!name_create(name));
+	char* name = randName();
+	name_create(name);
 	_assert(!name_destroy(name)); /* no errors expected */
 	_assert(name_destroy(name) == -1); /* already destroyed */
-	_assert(name_destroy("Vicks") == -1); /* does not exist either */
+	_assert(name_destroy(randName()) == -1); /* does not exist either */
 	_assert(name_destroy(NULL) == -1);
 	return 0;
 }
@@ -45,9 +53,9 @@ int _name_destroy()
 int _name_get()
 {
 	_assert(name_get(NULL) == NULL);
-	char* name = "Piere";
+	char* name = randName();
 	name_create(name);
-	_assert(!strcmp(name, name_get(name))); /* no errors expected */
+	_assert(!strcmp(name, name_get(name))); /* names should compare */
 	name_destroy(name);
 	_assert(name_get(name) == NULL); /* no longer exists */
 	return 0;
@@ -55,68 +63,51 @@ int _name_get()
 
 int _name_change()
 {
-	char* oldName = "Gandalf The Grey";
-	char * newName = "Gandalf The White";
+	char* oldName = "To Be Changed";
 	name_create(oldName);
+	char* newName = randName(); 
 	_assert(name_change(NULL, newName) == -6); 
 	_assert(name_change(oldName, NULL) == -1);
 	_assert(!name_change(oldName, newName)); /* no errors expected */
-	_assert(name_destroy(oldName) == -1); /* no longer exists */
-	_assert(!name_destroy(newName)); 
+	_assert(name_destroy(oldName) == -1); /* no such name in list */
+	name_destroy(newName); 
 	return 0;
 }
 
-#include "acter.h"
+#include "agent.h"
 
-int _acter_create()
+int _agent_create()
 {
-	char* name = "Cloud";
-	_assert(!acter_create(name)); /* no errors expected */
-	_assert(acter_create(name) == -5); /* acter name already exists */
-	acter_destroy(name);
+	char* name = randName();
+	_assert(!agent_create(name)); /* no errors expected */
+	_assert(agent_create(name) == -5); /* agent name already exists */
+	agent_destroy(name);
 	return 0;
 }
 
-int _acter_destroy()
+int _agent_destroy()
 {
-	char* name = "Aeres";
-	acter_create(name);
-	_assert(acter_destroy(NULL) == -1);
-	_assert(!acter_destroy(name));
-	_assert(acter_destroy(name) == -2);
-	name = "not an acter";
+	char* name = randName();
+	agent_create(name);
+	_assert(agent_destroy(NULL) == -1);
+	_assert(!agent_destroy(name));
+	_assert(agent_destroy(name) == -2);
+	name = "not an agent";
 	name_create(name);
-	_assert(acter_create(name) == -5);
-	_assert(acter_destroy(name) == -3);
+	_assert(agent_create(name) == -5);
+	_assert(agent_destroy(name) == -3);
 	name_destroy(name);
 	return 0;
 }
 
-int _acter_get()
+int _agent_get()
 {
-	_assert(acter_get(NULL) == NULL);
-	char* name = "Barret";
-	acter_create(name);
-	_assert(!strcmp(name, acter_get(name)->name)); /* no errors expected */
-	acter_destroy(name);
-	_assert(acter_get(name) == NULL);
-	return 0;
-}
-
-int _acter_group_resign()
-{
-	struct acter_group* group = acter_group_new();
-	char* name = "RED XIII";
-	char* name2 = "Tifa";
-	acter_create(name);
-	acter_create(name2);
-	_assert(!acter_group_assign(acter_get(name), group));
-	_assert(!acter_group_assign(acter_get(name2), group));
-	_assert(!acter_group_resign(acter_get(name), group));
-	_assert(acter_group_resign(acter_get(name), group) == -1);
-	acter_destroy(name);
-	acter_destroy(name2);
-	free(group);
+	_assert(agent_get(NULL) == NULL);
+	char* name = randName();
+	agent_create(name);
+	_assert(!strcmp(name, agent_get(name)->name)); /* no errors expected */
+	agent_destroy(name);
+	_assert(agent_get(name) == NULL);
 	return 0;
 }
 
@@ -125,7 +116,7 @@ int _acter_group_resign()
 int _user_create()
 {
 	_assert(user_create(NULL) == -1);
-	char* name = "Trinity";
+	char* name = randName();
 	_assert(!user_create(name)); /* no errors expected */
 	_assert(user_create(name) == -5); /* duplicate user name */
 	user_destroy(name);
@@ -134,14 +125,14 @@ int _user_create()
 
 int _user_destroy()
 {
-	char* name = "Mr Anderson";
+	char* name = "To Be Changed"; 
 	user_create(name);
 	_assert(user_destroy(NULL) == -1);
 	_assert(!user_destroy(name)); /* no errors expected */
 	_assert(user_destroy(name) == -2); /* no such user */
 	_assert(name_get(name) == NULL);
 	user_create(name);
-	char* newName = "Neo";
+	char* newName = randName();
 	name_change(name, newName);
 	_assert(user_destroy(name) == -2);
 	_assert(!user_destroy(newName));
@@ -155,7 +146,7 @@ int _user_destroy()
 int _user_get()
 {
 	_assert(user_get(NULL) == NULL);
-	char* name = "Morpheus";
+	char* name = randName();
 	user_create(name);
 	_assert(!strcmp(name, user_get(name)->name)); /* no errors expected */
 	user_destroy(name);
@@ -163,18 +154,47 @@ int _user_get()
 	return 0;
 }
 
-int user_party_assign()
+int user_team_assign()
 {
-	char* userName = "Patrick Stewart";
+	char* userName = randName();
 	user_create(userName);
-	struct user* newUser = user_get(userName);
-	char* name = "Capt Jean Luc Picard";
-	acter_create(name);
-	_assert(!acter_group_assign(acter_get(name), newUser->party));
-	_assert(!acter_group_resign(acter_get(name), newUser->party));
-	_assert(acter_group_resign(acter_get(name), newUser->party) == -1);
-	acter_destroy(name);
+	char* agentName = "rands agent";
+	agent_create(agentName);
+	_assert(agent_team_assign(NULL, userName) == -1);
+	_assert(agent_team_assign(agentName, NULL) == -2);
+	_assert(!agent_team_assign(agentName, userName));
+	_assert(agent_team_resign(NULL, userName) == -1);
+	_assert(agent_team_resign(agentName, NULL) == -2);
+	_assert(!agent_team_resign(agentName, userName));
+	_assert(agent_team_resign(agentName, userName) == -3);
+	agent_destroy(agentName);
+
+	int i;
+	for ( i=0; i<AGENT_TEAM_MAX; i++ )
+	{
+		agent_create(agentName);
+		agent_team_assign(agentName, userName);
+		agent_destroy(agentName); /* does not reduce user->team */
+	} 
+	agent_create(agentName);
+	_assert(agent_team_assign(agentName, userName) == -3); /* team full */
+
+	agent_destroy(agentName);
 	user_destroy(userName);
+	return 0;
+}
+
+/* agent_stat */
+
+int _agent_stat_weight()
+{
+	char* name = randName();
+	agent_create(name);
+	agent_get(name)->stat->fat = 23;
+	agent_get(name)->stat->water = 68;
+	agent_get(name)->stat->grain = 33;
+	_assert(agent_stat_weight(name) == 124.0);
+	agent_destroy(name);
 	return 0;
 }
 
@@ -187,16 +207,16 @@ int all_tests()
 	test(_name_get);
 	test(_name_change);
 
-	test(_acter_create);
-	test(_acter_destroy);
-	test(_acter_get);
-	test(_acter_group_resign);
+	test(_agent_create);
+	test(_agent_destroy);
+	test(_agent_get);
 
 	test(_user_create);
 	test(_user_destroy);
 	test(_user_get);
-	test(user_party_assign);
+	test(user_team_assign);
 
+	test(_agent_stat_weight);
 	return 0;
 }
 
