@@ -1,6 +1,6 @@
 /* name.h */
 
-#define NAME_LENGTH_MAX 21
+#define NAME_LENGTH_MAX 20
 
 int name_create(const char*);
 int name_destroy(const char*);

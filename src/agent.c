@@ -24,9 +24,7 @@ int agent_create(const char* name)
 
 int agent_destroy(const char* name) /* leave dangling pointer at user->team */
 {
-	if ( !name ) return -1;
-
-	if ( name_get(name) == NULL ) return -2; /* no such name */
+	if ( !name_get(name) ) return -2; /* no such name */
 
 	int i;
 	for ( i=0; i<agent_count; i++ )
@@ -46,7 +44,7 @@ int agent_destroy(const char* name) /* leave dangling pointer at user->team */
 
 struct agent* agent_get(const char* name)
 {
-	if ( !name ) return NULL;
+	if ( !name_get(name) ) return NULL;
 
 	int i;
 	for ( i=0; i<agent_count; i++ )
@@ -67,20 +65,25 @@ struct agent_team* agent_team_new()
 
 int agent_team_assign(char* agentName, char* userName)
 {
-	if ( agent_get(agentName) == NULL ) return -1;
-	if ( user_get(userName) == NULL ) return -2;
+	if ( !agent_get(agentName) ) return -1;
+	if ( !user_get(userName) ) return -2;
 
 	struct agent_team* team = user_get(userName)->team;
 	if ( team->count >= AGENT_TEAM_MAX ) return -3; /* team full */
 
-	team->member[team->count++] = agent_get(agentName);
+	int i;
+	for ( i=0; i<team->count; i++ )
+		if ( !strcmp(agentName, team->member[i]->name) ) return -4;
+
+	team->member[team->count] = agent_get(agentName);
+	team->count++;
 	return 0;
 }
 
 int agent_team_resign(char* agentName, char* userName)
 {
-	if ( agent_get(agentName) == NULL ) return -1;
-	if ( user_get(userName) == NULL ) return -2;
+	if ( !agent_get(agentName) ) return -1;
+	if ( !user_get(userName) ) return -2;
 
 	struct agent_team* team = user_get(userName)->team;
 

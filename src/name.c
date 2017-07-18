@@ -16,7 +16,7 @@ static int name_check(const char* name) /* returns 0 if name is valid */
 
 	if ( !strcmp("", name) ) return -2; /* name is blank */
 
-	char* copiedName = (char*) malloc(NAME_LENGTH_MAX * sizeof (char));
+	char* copiedName = (char*) malloc((NAME_LENGTH_MAX +1) * sizeof (char));
 	memcpy(copiedName, name, NAME_LENGTH_MAX);
 	if ( !copiedName || strcmp(name, copiedName) )
 	{ 
@@ -88,7 +88,7 @@ int name_change(const char* old, const char* new)
 {
 	if ( name_check(new) ) return name_check(new); /* returns -1 thru -5 */
 
-	if ( name_get(old) == NULL ) return -6; /* no such name */
+	if ( !name_get(old) ) return -6; /* no such name */
 
 	strcpy(name_get(old), new);
 	return 0;
